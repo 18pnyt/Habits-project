@@ -1,4 +1,4 @@
-import db from 'dat';
+import db from "dat";
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
