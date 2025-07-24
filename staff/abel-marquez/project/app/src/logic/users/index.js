@@ -8,16 +8,9 @@ import getUserRole from './getUserRole'
 import isUserRoleRegular from './isUserRoleRegular'
 import isUserRoleModerator from './isUserRoleModerator'
 
-import createPost from './createPost'
-import getPosts from './getPosts'
-import toggleLikePost from './toggleLikePost'
-import deletePost from './deletePost'
 
-import addComment from './addComment'
-import getComments from './getComments'
-import removeComment from './removeComment'
 
-const logic = {
+export {
     registerUser,
     loginUser,
     isUserLoggedIn,
@@ -25,17 +18,6 @@ const logic = {
     logoutUser,
     getUserId,
     getUserRole,
-    isUserRoleRegular,
     isUserRoleModerator,
-
-    createPost,
-    getPosts,
-    toggleLikePost,
-    deletePost,
-
-    addComment,
-    getComments,
-    removeComment
+    isUserRoleRegular
 }
-
-export default logic

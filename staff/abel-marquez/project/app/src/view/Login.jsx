@@ -1,84 +1,169 @@
-import { Button, Input, Form, Anchor } from './library';
-import logo from "../assets/LOGOS.png";
-import Footer from './components/Footer';
+import { Anchor, Button, Input, PasswordInput } from './library';
+import logic from '../logic';
+import { errors as comErrors } from 'com';
+import { useNotifications } from './hooks/useNotifications.jsx';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const { SystemError } = comErrors;
 
 export default function Login(props) {
-    console.log('Login -> render')
+    const { alert } = useNotifications();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        username: '',
+        password: ''
+    });
+    const [formErrors, setFormErrors] = useState({});
 
-  
+    const validateForm = () => {
+        const newErrors = {};
+        
+        if (!formData.username.trim()) {
+            newErrors.username = 'El usuario o email es requerido';
+        }
+        
+        if (!formData.password) {
+            newErrors.password = 'La contraseña es requerida';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+        }
 
-    const handleSubmit = event => {
-        event.preventDefault()
+        setFormErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
-        const { target: { username: { value: username }, password: { value: password } } } = event
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        
+        // Limpiar error del campo cuando el usuario empiece a escribir
+        if (formErrors[name]) {
+            setFormErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        setLoading(true);
 
         try {
-            logic.loginUser(username, password)
-                .then(() => {
-                    event.target.reset()
-
-                    props.onLoggedIn()
-                })
-                .catch(error => {
-                    if (error instanceof SystemError)
-                        alert('Sorry, try again later')
-                    else
-                        alert(error.message)
-
-                    console.error(error)
-                })
+            await logic.loginUser(formData.username, formData.password);
+            setFormData({ username: '', password: '' });
+            props.onLoggedIn();
         } catch (error) {
-            alert(error.message)
-
-            console.error(error)
+            alert(error.message, 'error');
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
-    const handleRegisterClick = event => {
-        event.preventDefault()
-
-        props.onRegisterClick()
-    }
+    const handleRegisterClick = (event) => {
+        event.preventDefault();
+        navigate('/register');
+    };
 
     return (
-        <main className="justify-self-center h-full ">
-            {/* Div para el logo y el título */}
-            <div className="flex items-center justify-around mb-[32px] mt-[32px]  ">
-                <h1 className="text-[30px] font-bold">Hábitos</h1>
-                <img src={logo} alt="Logo de la app" className="w-[64px] h-[64px]" />
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                {/* Header con logo y título */}
+                <div className="text-center mb-8">
+                    <div className="flex items-center justify-center space-x-4 mb-4">
+                        <h1 className="text-3xl font-bold text-gray-800">Habíme</h1>
+                        <img src="logo.png" alt="Logo de la app" className="w-16 h-16" />
+                    </div>
+                    <p className="text-gray-600">Inicia sesión para continuar con tus hábitos</p>
+                </div>
+
+                {/* Formulario */}
+                <div className="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Iniciar Sesión</h2>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                                Usuario
+                            </label>
+                            <Input
+                                type="text"
+                                placeholder="Ingresa tu usuario"
+                                id="username"
+                                name="username"
+                                value={formData.username}
+                                onChange={handleInputChange}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                                    formErrors.username ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {formErrors.username && (
+                                <p className="text-red-500 text-sm mt-1">{formErrors.username}</p>
+                            )}
+                        </div>
+                        
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                Contraseña
+                            </label>
+                            <PasswordInput
+                                placeholder="Ingresa tu contraseña"
+                                id="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                                    formErrors.password ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {formErrors.password && (
+                                <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
+                            )}
+                        </div>
+                        
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            variant="primary"
+                            size="lg"
+                            className="w-full mt-6"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                    Iniciando sesión...
+                                </>
+                            ) : (
+                                'Iniciar Sesión'
+                            )}
+                        </Button>
+                    </form>
+                </div>
+
+                {/* Enlace para registrarse */}
+                <div className="text-center mt-6">
+                    <p className="text-gray-600">
+                        ¿No tienes cuenta?{' '}
+                        <Anchor 
+                            href="/register"
+                            onClick={handleRegisterClick} 
+                            className="text-blue-500 hover:text-blue-600 font-semibold hover:underline transition-colors"
+                        >
+                            Regístrate aquí
+                        </Anchor>
+                    </p>
+                </div>
             </div>
-
-            <h2 className="text-[24px] font-bold ml-[32px]"> Login </h2>
-
-            {/* Formulario */}
-            <Form onSubmit={handleSubmit} className="bg-white p-[32px] rounded-lg shadow-md w-[320px] mb-[16px]">
-                <Input
-                    type="email"
-                    placeholder="Username or email"
-                    className="w-4/5 mb-6 mx-auto px-4 py-2 border border-gray-300 rounded"
-                />
-                <Input
-                    type="password"
-                    placeholder="Password"
-                    className="w-4/5 mb-6 mx-auto px-4 py-2 border border-gray-300 rounded"
-                />
-                <Button
-                    type="submit"
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-all"
-                >
-                    Register 
-                </Button>
-                
-                
-            </Form>
-
-            {/* Enlace para registrarse */}
-            <div className="mt-[16px]">
-                <Anchor href="/register"
-                onClick={handleRegisterClick} className="text-blue-500 hover:underline">
-                    Si no tienes cuenta, <strong>aquí</strong>
-                </Anchor>
-            </div>
-        </main>
+        </div>
     );
 }

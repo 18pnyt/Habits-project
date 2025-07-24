@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import Input from './Input';
 
-import Input from './Input'
-
-export default function PasswordInput() {
+export default function PasswordInput({ placeholder, value, onChange, className, ...props }) {
     const [status, setStatus] = useState('😊');
     const [type, setType] = useState('password');
 
@@ -12,13 +11,17 @@ export default function PasswordInput() {
     };
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Input type={type} className="w-full px-4 py-2 border border-gray-300 rounded" />
+        <div className="relative w-full">
+            <Input 
+                type={type} 
+                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
+                className={className}
+                {...props}
+            />
             <span
-                style={{
-                    cursor: 'pointer',
-                    marginLeft: '10px',
-                }}
+                className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
                 onClick={handleToggleClick}
             >
                 {status}

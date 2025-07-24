@@ -1,7 +1,9 @@
 import {
     registerUser,
     authenticateUser,
-    getUserName
+    getUserName,
+    getUserDetails,
+    updateUser
 } from './users/index.js'
 
 
@@ -13,16 +15,54 @@ import {
     updateHabit
 } from './habits/index.js'
 
+import {
+    addGoal,
+    deleteGoal,
+    updateGoal,
+    getGoals
+} from './goals/index.js'
+
+import {
+    addProgress,
+    deleteProgress,
+    getProgress,
+    updateProgress
+} from './progress/index.js'
+
+import {
+    addEvent,
+    deleteEvent,
+    getEvents,
+    updateEvent
+} from './events/index.js'
+
 const logic = {
     registerUser,
     authenticateUser,
     getUserName,
+    getUserDetails,
+    updateUser,
 
     addHabit,
     deleteHabit,
     getHabits,
     trackHabitProgress,
-    updateHabit
+    updateHabit,
+
+    addGoal,
+    updateGoal,
+    deleteGoal,
+    getGoals,
+
+    addProgress,
+    deleteProgress,
+    updateProgress,
+    getProgress,
+
+    addEvent,
+    deleteEvent,
+    updateEvent,
+    getEvents
 }
 
 export default logic 

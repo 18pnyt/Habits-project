@@ -7,11 +7,13 @@
   "scripts": {
     "start": "node .",
     "inspect": "node --inspect-brk .",
-    "test": "mocha logic/*.spec.js",
-    "test-one": "mocha",
-    "test-inspect": "mocha --inspect-brk logic/*.spec.js",
-    "test-inspect-one": "mocha --inspect-brk",
-    "coverage": "c8 --experimental-monocart --reporter=html --reporter=text mocha logic/*.spec.js --timeout 20000"
+    "specs": "node runSpecs.js",
+    "specs:users": "node logic/users/registerUser.spec.js && node logic/users/authenticateUser.spec.js && node logic/users/updateUser.spec.js && node logic/users/getUserDetails.spec.js && node logic/users/getUserName.spec.js",
+    "specs:habits": "node logic/habits/addHabit.spec.js && node logic/habits/getHabits.spec.js && node logic/habits/updateHabit.spec.js && node logic/habits/deleteHabit.spec.js && node logic/habits/trackHabitProgress.spec.js",
+    "specs:goals": "node logic/goals/addGoal.spec.js && node logic/goals/getGoals.spec.js && node logic/goals/updateGoal.spec.js && node logic/goals/deleteGoal.spec.js",
+    "specs:events": "node logic/events/addEvent.spec.js && node logic/events/getEvents.spec.js && node logic/events/updateEvent.spec.js && node logic/events/deleteEvent.spec.js",
+    "specs:progress": "node logic/progress/addProgress.spec.js && node logic/progress/getProgress.spec.js && node logic/progress/updateProgress.spec.js && node logic/progress/deleteProgress.spec.js",
+    "clean-test-db": "node logic/cleanTestDb.js"
   },
   "keywords": [],
   "author": "",
@@ -21,15 +23,21 @@
     "com": "file:../com",
     "cors": "^2.8.5",
     "dat": "file:../dat",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.3"
   },
   "devDependencies": {
-    "c8": "^10.1.2",
-    "chai": "^5.1.2",
-    "chai-as-promised": "^8.0.0",
-    "mocha": "^10.8.2",
-    "monocart-coverage-reports": "^2.11.2"
+    "@jest/globals": "^29.7.0",
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/*.spec.js"],
+    "testTimeout": 10000,
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }

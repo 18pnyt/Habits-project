@@ -1,12 +1,20 @@
 import Login from './Login'
 import Register from './Register'
-import Home from './Home'
-//import Progress from './Progress'
+import Diary from './Diary'
+import Goals from './Goals'
+import Progress from './Progress'
+import Habits from './Habits'
+import Settings from './Settings'
+
 
 
 
 export {
     Login,
     Register,
-    Home
-    }
+    Habits,
+    Diary,
+    Progress,
+    Goals,
+    Settings
+}

@@ -1,132 +1,29 @@
+import db from 'dat';
 import 'dotenv/config'
-import db from 'dat'
-import express, { json } from 'express'
+import express from 'express'
 import cors from 'cors'
-import jwt from 'jsonwebtoken'
-
-import logic from './logic/index.js'
-import { createFunctionalHandler, authorizationHandler, errorHandler } from './helpers/index.js'
-
-db.connect(process.env.MONGO_URL)
-    .then(() => {
-        console.log('connected to db')
-
-        const server = express()
-
-        server.use(cors())
-
-        const jsonBodyParser = json()
-
-        server.get('/', (_, res) => res.send('Hello, API!'))
-
-        server.post('/users/auth', jsonBodyParser, createFunctionalHandler ((req, res) => {
-            
-            const { username, password } = req.body
-
-        return logic.authenticateUser(username, password)
-                    .then(({ id, role }) => jwt.sign({ sub: id, role} , process.env.JWT_SECRET, { expiresIn: '1h'}))
-                    .then(token => res.json(token))
-        }))
-            
-
-        server.post('/users', jsonBodyParser, createFunctionalHandler ((req, res) => {
-    
-    
-        const { name, email, username, password, 'password-repeat': passwordRepeat } = req.body
-
-    return logic.registerUser(name, email, username, password, passwordRepeat)
-            .then(() => res.status(201).send())
-            
-    }))
-       
-
-    server.get('/users/:targetUserId/name', authorizationHandler, createFunctionalHandler ((req, res) => {
-        
-        const { userId, params: { targetUserId } } = req
-
-          
-
-         return  logic.getUserName(userId, targetUserId)
-                .then(name => res.json(name))
-               
-    }))
+import { usersRouter, habitsRouter, goalsRouter, progressRouter, eventsRouter } from './routes/index.js';
 
 
-    server.post('/posts', jsonBodyParser, authorizationHandler, createFunctionalHandler ((req, res) => {
-    
-         const { userId, body: { image, text } } = req
+import { errorHandler } from './routes/helpers/index.js'
 
-       return logic.createPost(userId, image, text)
-        .then(() => res.status(201).send())
-        
-}))
+db.connect(process.env.MONGO_URL).then(() => {
+    console.log('Conectado a MongoDB')
 
-server.get('/posts', authorizationHandler, createFunctionalHandler ((req, res) => {
-    
-        const { userId } = req
+    const server = express()
 
-        return logic.getPosts(userId)
-            .then(posts => res.json(posts))
-            
-}))
+    server.use(cors())
+    server.use(express.json())
 
-server.delete('/posts/:postId', authorizationHandler, createFunctionalHandler ((req, res) => {
-    
-        const { userId, params: { postId } } = req 
+    server.get('/', (_, res) => res.send('¡Hola, API!'))
 
-        
+    server.use('/users', usersRouter)
+    server.use('/habits', habitsRouter)
+    server.use('/goals', goalsRouter)
+    server.use('/progress', progressRouter)
+    server.use('/events', eventsRouter)
 
-        return logic.deletePost(userId, postId)
-            .then(() => res.status(204).send())
-           
-}))
+    server.use(errorHandler)
 
-server.patch('/posts/:postId/likes', authorizationHandler, createFunctionalHandler ((req, res) => {
-    
-        const { userId, params: { postId } } = req
-
-       return logic.toggleLikePost(userId, postId)
-            .then(() => res.status(204).send())
-            
-}))
-
-server.post('/posts/:postId/comments', authorizationHandler, jsonBodyParser, createFunctionalHandler ((req, res) => {
-    
-
-    
-        const { userId, params: { postId }, body: { text } } = req
-
-       return logic.addComment(userId, postId, text)
-        .then(() => res.status(201).send())
-       
-}))
-
-server.delete('/posts/:postId/comments/:commentId', authorizationHandler, createFunctionalHandler ((req, res) => {
-    
-
-    const { userId, params: { postId, commentId } } = req
-
-    
-       return logic.removeComment(userId, postId, commentId)
-            .then(() => res.status(204).send())
-           
-     
-    
-}))
-
-server.get('/posts/:postId/comments', authorizationHandler, createFunctionalHandler ((req, res) => {
-    
-    const { userId, params: { postId } } = req
-
-    return logic.getComments(userId, postId)
-        .then(comments => res.json(comments))
-       
-}))
-
-server.use(errorHandler)
-
-server.listen(process.env.PORT, () => console.log(`API listening on port ${process.env.PORT}`))
-
+    server.listen(process.env.PORT, () => console.log(`API escuchando en puerto ${process.env.PORT}`))
 })
-
-// TODO use cookies for session management (RTFM cookies + express)
